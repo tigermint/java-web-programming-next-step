@@ -4,7 +4,9 @@ import java.io.*;
 import java.net.Socket;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
+import java.util.Map;
 
+import model.User;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import util.HttpRequestUtils;
@@ -31,6 +33,22 @@ public class RequestHandler extends Thread {
             }
 
             String url = HttpRequestUtils.getUrl(firstLine);
+            if (url.startsWith("/user/create")) {
+                int questionMarkIndex = url.indexOf("?");
+                if (questionMarkIndex != -1) {
+                    String queryString = url.substring(questionMarkIndex + 1);
+                    log.debug("queryString: {}", queryString);
+
+                    Map<String, String> createUserMap = HttpRequestUtils.parseQueryString(queryString);
+                    User user = new User(createUserMap.get("userId"), createUserMap.get("password"),
+                            createUserMap.get("name"), createUserMap.get("email"));
+
+                    log.debug("User : {}", user);
+                    url= "/index.html";
+                } else {
+                    log.debug("no query string");
+                }
+            }
 
             DataOutputStream dos = new DataOutputStream(out);
             byte[] body = Files.readAllBytes(new File("./web-application-server-gradle/webapp" + url).toPath());
