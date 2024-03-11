@@ -99,6 +99,7 @@ public class RequestHandler extends Thread {
         try {
             dos.writeBytes("HTTP/1.1 302 Redirect \r\n");
             dos.writeBytes("Location: " + location + "\r\n");
+            dos.writeBytes("Set-Cookie: " + cookie + "\r\n");
             dos.writeBytes("\r\n");
         } catch (IOException e) {
             log.error(e.getMessage());
