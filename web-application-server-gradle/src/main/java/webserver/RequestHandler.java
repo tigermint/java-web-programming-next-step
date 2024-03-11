@@ -38,7 +38,7 @@ public class RequestHandler extends Thread {
 
             String url = HttpRequestUtils.getUrl(line);
             Map<String, String> headerMap = new HashMap<>();
-            boolean logined = false;
+            boolean loginStatus = false;
             int contentLength = 0;
 
             while (!line.isEmpty()) {
@@ -47,7 +47,7 @@ public class RequestHandler extends Thread {
                     contentLength = Integer.parseInt(getContentLength(headerMap, line));
                 }
                 if (line.contains("Cookie")) {
-                    logined = isLogin(line);
+                    loginStatus = isLogin(line);
                 }
             }
 
@@ -74,16 +74,16 @@ public class RequestHandler extends Thread {
                 if (optionalUser.isPresent() && optionalUser.get().getPassword().equals(paramMap.get("password"))) {
                     //쿠키 저장
                     redirectUrl = "/index.html";
-                    cookie = "logined=true";
+                    cookie = "loginStatus=true";
                 } else {
                     redirectUrl = "/user/login_failed.html";
-                    cookie = "logined=false";
+                    cookie = "loginStatus=false";
                 }
                 DataOutputStream dos = new DataOutputStream(out);
                 response302HeaderWithCookie(dos, redirectUrl, cookie);
 
             } else if (url.equals("/user/list")) {
-                if (!logined) {
+                if (!loginStatus) {
                     DataOutputStream dos = new DataOutputStream(out);
                     response302Header(dos, "/user/login.html");
                     return;
