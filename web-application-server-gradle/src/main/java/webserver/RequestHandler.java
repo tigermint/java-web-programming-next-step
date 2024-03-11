@@ -39,11 +39,12 @@ public class RequestHandler extends Thread {
             String url = HttpRequestUtils.getUrl(line);
             Map<String, String> headerMap = new HashMap<>();
             boolean logined = false;
+            int contentLength = 0;
 
             while (!line.isEmpty()) {
                 line = br.readLine();
                 if(line.contains("Content-Length")) {
-                    headerMap.put("Content-Length", line.split(":")[1].trim());
+                    contentLength = Integer.parseInt(getContentLength(headerMap, line));
                 }
                 if (line.contains("Cookie")) {
                     logined = isLogin(line);
@@ -52,7 +53,6 @@ public class RequestHandler extends Thread {
 
             //URL 분기 처리
             if (url.startsWith("/user/create")) {
-                int contentLength = Integer.parseInt(headerMap.get("Content-Length"));
                 String requestBody = IOUtils.readData(br, contentLength);
                 Map<String, String> paramMap = HttpRequestUtils.parseQueryString(requestBody);
                 User user = new User(paramMap.get("userId"), paramMap.get("password"), paramMap.get("name"), paramMap.get("email"));
@@ -64,7 +64,6 @@ public class RequestHandler extends Thread {
                 response302Header(dos, url);
 
             } else if (url.equals("/user/login")) {
-                int contentLength = Integer.parseInt(headerMap.get("Content-Length"));
                 String requestBody = IOUtils.readData(br, contentLength);
                 Map<String, String> paramMap = HttpRequestUtils.parseQueryString(requestBody);
 
@@ -118,6 +117,10 @@ public class RequestHandler extends Thread {
         } catch (IOException e) {
             log.error(e.getMessage());
         }
+    }
+
+    private static String getContentLength(Map<String, String> headerMap, String line) {
+        return headerMap.put("Content-Length", line.split(":")[1].trim());
     }
 
     private boolean isLogin(String line) {
