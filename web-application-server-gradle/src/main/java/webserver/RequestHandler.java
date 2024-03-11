@@ -41,7 +41,6 @@ public class RequestHandler extends Thread {
             boolean logined = false;
 
             while (!line.isEmpty()) {
-//                log.debug("header: {}", line);
                 line = br.readLine();
                 if(line.contains("Content-Length")) {
                     headerMap.put("Content-Length", line.split(":")[1].trim());
@@ -55,15 +54,11 @@ public class RequestHandler extends Thread {
             if (url.startsWith("/user/create")) {
                 int contentLength = Integer.parseInt(headerMap.get("Content-Length"));
                 String requestBody = IOUtils.readData(br, contentLength);
-//                log.debug("Request Body: {}", requestBody);
                 Map<String, String> paramMap = HttpRequestUtils.parseQueryString(requestBody);
                 User user = new User(paramMap.get("userId"), paramMap.get("password"), paramMap.get("name"), paramMap.get("email"));
 
                 //User 저장
                 DataBase.addUser(user);
-//                log.debug("User : {}", user);
-//                log.debug("DataBase : {}", DataBase.findAll());
-
                 url = "/index.html";
                 DataOutputStream dos = new DataOutputStream(out);
                 response302Header(dos, url);
@@ -71,7 +66,6 @@ public class RequestHandler extends Thread {
             } else if (url.equals("/user/login")) {
                 int contentLength = Integer.parseInt(headerMap.get("Content-Length"));
                 String requestBody = IOUtils.readData(br, contentLength);
-//                log.debug("Request Body: {}", requestBody);
                 Map<String, String> paramMap = HttpRequestUtils.parseQueryString(requestBody);
 
                 //DataBase에서 찾기
