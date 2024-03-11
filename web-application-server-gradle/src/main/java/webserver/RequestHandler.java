@@ -6,6 +6,7 @@ import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Optional;
 
 import db.DataBase;
 import model.User;
@@ -62,12 +63,43 @@ public class RequestHandler extends Thread {
                 DataOutputStream dos = new DataOutputStream(out);
                 response302Header(dos, url);
 
+            } else if (url.equals("/user/login")) {
+                int contentLength = Integer.parseInt(headers.get("Content-Length"));
+                String requestBody = IOUtils.readData(br, contentLength);
+                log.debug("Request Body: {}", requestBody);
+                Map<String, String> paramMap = HttpRequestUtils.parseQueryString(requestBody);
+
+                //DataBase에서 찾기
+                Optional<User> optionalUser = Optional.ofNullable(DataBase.findUserById(paramMap.get("userId")));
+                String redirectUrl = "";
+                String cookie = "";
+                if (optionalUser.isPresent() && optionalUser.get().getPassword().equals(paramMap.get("password"))) {
+                    //쿠키 저장
+                    redirectUrl = "/index.html";
+                    cookie = "logined=true";
+                }else{
+                    redirectUrl = "/user/login_failed.html";
+                    cookie = "logined=false";
+                }
+                DataOutputStream dos = new DataOutputStream(out);
+                response302HeaderWithCookie(dos, redirectUrl, cookie);
+
             } else {
                 DataOutputStream dos = new DataOutputStream(out);
                 byte[] body = Files.readAllBytes(new File("./web-application-server-gradle/webapp" + url).toPath());
                 response200Header(dos, body.length);
                 responseBody(dos, body);
             }
+        } catch (IOException e) {
+            log.error(e.getMessage());
+        }
+    }
+
+    private void response302HeaderWithCookie(DataOutputStream dos, String location, String cookie) {
+        try {
+            dos.writeBytes("HTTP/1.1 302 Redirect \r\n");
+            dos.writeBytes("Location: " + location + "\r\n");
+            dos.writeBytes("\r\n");
         } catch (IOException e) {
             log.error(e.getMessage());
         }
