@@ -17,7 +17,9 @@ repositories {
 dependencies {
     api 'com.google.guava:guava:18.0'
     api 'ch.qos.logback:logback-classic:1.1.2'
-    testImplementation 'junit:junit:4.11'
+    testImplementation group: 'org.assertj', name: 'assertj-core', version: '3.22.0'
+    testImplementation 'org.junit.jupiter:junit-jupiter-api:5.3.1'
+    testRuntimeOnly 'org.junit.jupiter:junit-jupiter-engine:5.3.1'
 }
 
 group = 'org.nhnnext'
